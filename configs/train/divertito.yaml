@@ -1,0 +1,16 @@
+name: divertito
+device: "cuda:1"
+audio:
+  min_duration: 2.0 #sec
+  max_duration: 10.0 #sec
+data:
+  main_dir: "data/divertito/xtts" #путь до файлов обучения (wav/, train.txt, val.txt)
+  base_wav_path: data/divertito/audio/voice1.wav #аудио для обучения до разбиения
+  weights_folder: "out/divertito/xtts"
+  checkpoint_path: "out/divertito/xtts/best_model_v2.pth"
+  reference_audio: ["data/divertito/xtts/voice1/badwavs/voice1.wav_0015.wav"]
+models:
+  whisper: "large-v3"
+train:
+  epochs: 15
+  batch_size: 2

@@ -26,7 +26,7 @@ class XTTSFinetuner:
         return save_path
         
     
-    def finetune_model(self, base_model_path, train_metadata, eval_metadata, 
+    def finetune_model(self, device,base_model_path, train_metadata, eval_metadata, 
                        language="ru", num_epochs=10, batch_size=4, grad_accum=1, 
                        learning_rate=5e-6, checkpoint_pth_path=None,output_dir=None):
         """
@@ -62,6 +62,13 @@ class XTTSFinetuner:
         )
         
         # Model configuration
+        if os.path.exists(str(checkpoint_pth_path)):
+            print(f"Starting from existing checkpoint {str(checkpoint_pth_path)} ...")
+            checkpoint_pth_path = str(checkpoint_pth_path)
+        else:
+            print(f"Starting from base checpoint {str(base_model_path / 'model.pth')} ...")
+            checkpoint_pth_path = str(base_model_path / "model.pth")
+
         model_args = GPTArgs(
             max_conditioning_length=132300,
             min_conditioning_length=66150,
@@ -69,7 +76,7 @@ class XTTSFinetuner:
             max_text_length=200,
             mel_norm_file=str(base_model_path / "mel_stats.pth"),
             dvae_checkpoint=str(base_model_path / "dvae.pth"),
-            xtts_checkpoint=str(base_model_path / "model.pth") if checkpoint_pth_path is None else checkpoint_pth_path,
+            xtts_checkpoint=checkpoint_pth_path,
             tokenizer_file=str(base_model_path / "vocab.json"),
             gpt_num_audio_tokens=1026,
             gpt_start_audio_token=1024,
@@ -123,21 +130,21 @@ class XTTSFinetuner:
         train_samples, eval_samples = load_tts_samples([config_dataset], eval_split=True)
         
         trainer = Trainer(
-            TrainerArgs(gpu=0),
+            TrainerArgs(gpu=device.index),
             config,
             output_path=output_dir,
             model=model,
             train_samples=train_samples,
             eval_samples=eval_samples,
-            gpu=0
+            gpu=device.index
         )
         
         trainer.fit()
         
         # Return path to best model checkpoint
-        return output_dir / "best_model.pth"
+        return output_dir
     
-    def load_model(self, config_path, checkpoint_path, vocab_path,speaker_xtts_path):
+    def load_model(self, device,config_path, checkpoint_path, vocab_path,speaker_xtts_path):
         """Load a trained XTTS model for inference."""
         config = XttsConfig()
         config.load_json(config_path)
@@ -152,7 +159,7 @@ class XTTSFinetuner:
         )
         
         if torch.cuda.is_available():
-            model.cuda()
+            model.to(device)
             
         return model
     
@@ -160,7 +167,7 @@ class XTTSFinetuner:
         """Generate audio from text using the finetuned model."""
         # Get conditioning latents from reference audio
         gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
-            audio_path=[reference_audio],
+            audio_path=[reference_audio] if isinstance(reference_audio, str) else reference_audio,
             gpt_cond_len=model.config.gpt_cond_len,
             max_ref_length=model.config.max_ref_len
         )
