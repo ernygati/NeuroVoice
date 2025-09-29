@@ -71,7 +71,8 @@ class XTTSInference:
 
     # ---------- main generation ----------
     @torch.inference_mode()
-    def xtts_generate_long(self, model, 
+    def xtts_generate_long(self, 
+                           model, 
                            text: str,
                            reference_audio: str, 
                            language: str="ru",
@@ -82,7 +83,6 @@ class XTTSInference:
         Splits text safely and generates chunk-by-chunk with shared conditioning.
         Returns (chunks, wav).
         """
-        # Compute conditioning once
         gpt_cond_latent, speaker_embedding = model.get_conditioning_latents(
             audio_path=[reference_audio] if isinstance(reference_audio, str) else reference_audio,
             gpt_cond_len=model.config.gpt_cond_len,

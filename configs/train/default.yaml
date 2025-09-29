@@ -6,7 +6,7 @@ audio:
 data:
   main_dir: "data/<NAME>/xtts" #путь до файлов обучения (wav/, train.txt, val.txt)
   base_wav_path: <PASTE_PATH> #аудио для обучения до разбиения
-  weights_folder: "out/<NAME>/xtts"
+  weights_folder: "out/<NAME>/xtts" #путь до папки сохранения обученных весов
   checkpoint_path: null
   reference_audio: <PASTE_PATH>
 models:
