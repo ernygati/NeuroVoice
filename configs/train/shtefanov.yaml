@@ -1,0 +1,17 @@
+name: shtefanov
+device: cuda:0
+audio:
+  min_duration: 2.0
+  max_duration: 10.0
+data:
+  main_dir: data/shtefanov/xtts
+  base_wav_path: data/shtefanov/audio/voice1.wav
+  weights_folder: out/shtefanov/xtts
+  checkpoint_path: null
+  reference_audio: <PASTE_PATH>
+models:
+  whisper: small
+  VAD_folder: models/VAD
+train:
+  epochs: 15
+  batch_size: 2

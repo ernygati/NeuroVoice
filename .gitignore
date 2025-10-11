@@ -3,3 +3,5 @@
 data/
 *.pth
 .venv/
+*.onnx
+*.h

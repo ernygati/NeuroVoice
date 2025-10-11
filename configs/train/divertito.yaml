@@ -11,6 +11,7 @@ data:
   reference_audio: ["data/divertito/xtts/voice1/badwavs/voice1.wav_0015.wav"]
 models:
   whisper: "large-v3"
+  VAD_folder: models/VAD
 train:
   epochs: 15
   batch_size: 2

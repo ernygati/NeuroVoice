@@ -21,28 +21,37 @@ class TrainPipeline:
         self.device = torch.device(config["device"])
         self.finetuner = XTTSFinetuner(save_checkpoint_path=self.config["data"]["weights_folder"])
 
-    def _check_train_files(self, train_data_dir):
+    def _check_train_files(self):
         mandatory_files = ["metadata_train.csv", "metadata_eval.csv", "wavs"]
         flag = True
-        if all(mf in os.listdir(train_data_dir) for mf in mandatory_files):
-            print("All mandatory files are ready!")
+        #создать папку wavs/ если она не существует
+        os.makedirs(os.path.join(self.train_data_dir, "wavs"), exist_ok=True)
+        if all(mf in os.listdir(self.train_data_dir) for mf in mandatory_files):
+            print("😊 All mandatory files are ready!")
         else:
             flag = False
-        if os.listdir(f"{train_data_dir}/wavs"):
-            print("wavs/ folder is not empty!")
+            print("😞 Mandatory files are not ready.")
+        if os.listdir(f"{self.train_data_dir}/wavs"):
+            print("😊 wavs/ folder is not empty!")
         else:
             flag = False
-        return os.path.join(train_data_dir,mandatory_files[0]),\
-            os.path.join(train_data_dir,mandatory_files[1])
+            print("😞 wavs/ folder is empty.")
+        if flag:
+            return os.path.join(self.train_data_dir,mandatory_files[0]),\
+                os.path.join(self.train_data_dir,mandatory_files[1])
+        else:
+            return False
 
     #готовим данные для обучения если их нет
-    def _preprocess_data(self,train_data_dir):
-        if not self._check_train_files(train_data_dir):
+    def _preprocess_data(self):
+        if not self._check_train_files():
+            print("⚙️ Starting process of creating files... (REQUIRES GPU!)")
             vad_processer = VADProcessor(self.device,
+                                vad_folder=self.config["models"]["VAD_folder"],
                                 min_duration=self.MIN_DURATION, 
                                 max_duration=self.MAX_DURATION)
             # Load and prepare audio
-            audio_path=self.config["base_wav_path"]
+            audio_path=self.config["data"]["base_wav_path"]
             wav, sr = torchaudio.load(audio_path)
             wav = wav.to(self.device)
             if wav.size(0) != 1:  # Convert stereo to mono
@@ -62,8 +71,8 @@ class TrainPipeline:
                     sr=sr,
                     vad_segments=vad_segments,
                     base_name=self.wav_filename,
-                    out_dir=train_data_dir,
-                    speaker=speaker,
+                    out_dir=self.train_data_dir,
+                    speaker=self.speaker,
                     min_duration=self.MIN_DURATION,
                     max_duration=self.MAX_DURATION,
                     language="ru",

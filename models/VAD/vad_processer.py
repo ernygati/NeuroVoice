@@ -15,12 +15,20 @@ class VADProcessor:
             """Load Silero VAD model with optimized settings"""
             os.makedirs(self._vad_folder, exist_ok=True)
             torch.hub.set_dir(self._vad_folder)
-            model, utils = torch.hub.load(
-                repo_or_dir='snakers4/silero-vad',
-                model='silero_vad',
-                force_reload=False,
-                verbose=False
-            )
+            try:
+                model, utils = torch.hub.load(
+                    repo_or_dir='snakers4/silero-vad',
+                    model='silero_vad',
+                    force_reload=False,
+                    verbose=False
+                )
+            except ValueError:
+                model, utils = torch.hub.load(
+                    repo_or_dir='snakers4/silero-vad',
+                    model='silero_vad',
+                    force_reload=True,
+                    verbose=False
+                )
             vad_model = model.to(self._device)
             get_speech_timestamps, collect_chunks = utils[0], utils[4]
             return vad_model, get_speech_timestamps, collect_chunks
@@ -111,8 +119,8 @@ class VADProcessor:
                     }
                     merged.append(merged_segment)
                 current_group = [segment]
-                if i==2:
-                    break
+                # if i==2:
+                #     break
 
         # Handle last group
         if current_group:
