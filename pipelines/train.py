@@ -79,11 +79,11 @@ class TrainPipeline:
                     train_split=0.85
                 )
         else:
-            train_metadata_path, eval_metadata_path = self._check_train_files(train_data_dir)
+            train_metadata_path, eval_metadata_path = self._check_train_files()
         return train_metadata_path, eval_metadata_path
 
     def train(self):
-        train_metadata_path, eval_metadata_path =self._preprocess_data(self.train_data_dir)
+        train_metadata_path, eval_metadata_path =self._preprocess_data()
         os.makedirs(self.config["data"]["weights_folder"], exist_ok=True)
         
         base_model_path =  self.finetuner.load_base_model()
