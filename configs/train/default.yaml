@@ -6,11 +6,12 @@ audio:
 data:
   main_dir: "data/<NAME>/xtts" #путь до файлов обучения (wav/, train.txt, val.txt)
   base_wav_path: <PASTE_PATH> #аудио для обучения до разбиения
-  weights_folder: "out/<NAME>/xtts" #путь до папки сохранения обученных весов
+  weights_folder: "out/<NAME>/xtts"
   checkpoint_path: null
   reference_audio: <PASTE_PATH>
 models:
   whisper: "large-v3"
+  VAD_folder: models/VAD
 train:
   epochs: 15
   batch_size: 2
