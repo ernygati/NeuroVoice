@@ -5,13 +5,13 @@ audio:
   max_duration: 10.0
 data:
   main_dir: data/shtefanov/xtts
-  base_wav_path: data/shtefanov/audio/voice1.wav
+  base_wav_path: ""
   weights_folder: out/shtefanov/xtts
-  checkpoint_path: null
-  reference_audio: <PASTE_PATH>
+  checkpoint_path: ""
+  reference_audio: []
 models:
-  whisper: small
+  whisper: large-v3
   VAD_folder: models/VAD
 train:
-  epochs: 15
+  epochs: 20
   batch_size: 2

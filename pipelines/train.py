@@ -7,14 +7,24 @@ import whisper
 from models.VAD.vad_processer import VADProcessor
 from transcriber.asr_transcriber import ASRTranscriber
 from models.tts.xtts_finetuner import XTTSFinetuner, OUTPUT_SAMPLE_RATE
+from utils.auxiliaries import download_audio
 
 
 class TrainPipeline:
     def __init__(self,config):
         self.config=config
         self.speaker = config["name"]
+        if not os.path.exists(config["data"]["base_wav_path"]):
+            print(f"По указанному пути '{config['data']['base_wav_path']}' не найдено .wav файла для обучения. Загрузить файл с Youtube? (да/нет)")
+            inp1 = str(input()).strip().lower()
+            if inp1=="да":
+                print("(Шаг [1/1]): Укажите ссылку на Youtube-видео:")
+                yt_link = str(input()).strip()
+                config["data"]["base_wav_path"]=download_audio(yt_link,config)
+            else:
+                raise StopIteration
         self.wav_filename = os.path.basename(config["data"]["base_wav_path"]).split(".")[0]
-
+        
         self.train_data_dir = os.path.join(config["data"]["main_dir"],self.wav_filename)
         self.MIN_DURATION = config["audio"]["min_duration"]
         self.MAX_DURATION = config["audio"]["max_duration"]
